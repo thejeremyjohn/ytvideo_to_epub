@@ -51,12 +51,11 @@ with tempfile.TemporaryDirectory() as tmpdir:
     text_file = tmp.joinpath(f"{title_filename}.txt")
     text_file.write_text(text)
 
-    print('converting text_file to epub ...')
-    epub_file = tmp.joinpath(f"{title_filename}.epub")
-
     print(f"saving thumbnail to (temporary) image file ...")
     thumbnail_file = image_url_to_file(attrs['thumbnail_url'], dir=tmp)
 
+    print('converting text_file to epub ...')
+    epub_file = tmp.joinpath(f"{title_filename}.epub")
     subprocess.run([
         'txt2epub', 'convert',
         '-i', f"{text_file.absolute()}",
