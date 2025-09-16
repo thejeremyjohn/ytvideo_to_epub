@@ -8,13 +8,13 @@ import tempfile
 
 def video_attrs(yt_url: str) -> dict:
     url = 'https://www.youtube.com/oembed'
-    querystring = {'url': yt_url}
-    r = requests.get(url, params=querystring)
+    r = requests.get(url, params={'url': yt_url})
     return r.json()
 
 
 def filename_safe(s: str) -> str:
-    return ''.join(x if (x.isalnum() or x in "._- ") else '_' for x in s)
+    def is_safe(c): return c.isalnum() or c in '._- '
+    return ''.join(x if is_safe(x) else '_' for x in s)
 
 
 def image_url_to_file(image_url: str, dir=Path('.')) -> Path:
@@ -25,29 +25,29 @@ def image_url_to_file(image_url: str, dir=Path('.')) -> Path:
     return image_file
 
 
-YT_URL = 'https://www.youtube.com/watch?v=09PICbN1A-c'
+YT_URL = 'https://www.youtube.com/watch?v=gtBIPF2aMys'
 attrs = video_attrs(YT_URL)
 channel = attrs['author_name']
 title = attrs['title']
 title_filename = filename_safe(f"{channel} - {title}")
 v_id = parse_qs(urlparse(YT_URL).query)['v'][0]
-
 print(f"video {channel=} {title=} {v_id=}")
+
+print('fetching transcript text ...')
+text = f"-\n( {YT_URL= } )\n"
+transcript_list = YouTubeTranscriptApi().list(v_id)
+for transcript in transcript_list:
+    fetched_transcript = transcript.fetch()
+    for snippet in fetched_transcript:
+        if snippet.text.startswith('>>'):  # another voice chimed in
+            text += '\n'
+        text += snippet.text + ' '
+    text += f"\n*** END OF {transcript.language.upper()} TRANSCRIPT ***\n"
+
 with tempfile.TemporaryDirectory() as tmpdir:
     tmp = Path(tmpdir)
 
-    print('fetching transcript text ...')
-    text = f"-\n( {YT_URL= } )\n"
-    transcript_list = YouTubeTranscriptApi().list(v_id)
-    for transcript in transcript_list:
-        fetched_transcript = transcript.fetch()
-        for snippet in fetched_transcript:
-            if snippet.text.startswith('>>'):  # another voice chimed in
-                text += '\n'
-            text += snippet.text + ' '
-        text += f"\n*** END OF {transcript.language.upper()} TRANSCRIPT ***\n"
-
-    print(f"saving transcript to (temporary) text_file ...")
+    print(f"saving transcript to (temporary) txt file ...")
     text_file = tmp.joinpath(f"{title_filename}.txt")
     text_file.write_text(text)
 
