@@ -74,6 +74,7 @@ def ytvideo_to_epub(YT_URL: str, mv_to_gdrive=True) -> (tuple[str, io.BytesIO] |
         print('converting text_file to epub ...')
         epub_file = tmp.joinpath(f"{title_filename}.epub")
         subprocess.run([
+            sys.executable, '-m',
             'txt2epub', 'convert',
             '-i', f"{text_file.absolute()}",
             '-o', f"{epub_file.absolute()}",
