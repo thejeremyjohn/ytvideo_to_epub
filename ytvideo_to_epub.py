@@ -4,6 +4,7 @@
 from youtube_transcript_api import YouTubeTranscriptApi
 from urllib.parse import urlparse, parse_qs
 from pathlib import Path
+import io
 import requests
 import subprocess
 import sys
@@ -29,16 +30,9 @@ def image_url_to_file(image_url: str, dir=Path('.')) -> Path:
     return image_file
 
 
-def main(YT_URL):
-    attrs = video_attrs(YT_URL)
-    channel = attrs['author_name']
-    title = attrs['title']
-    title_filename = filename_safe(f"{channel} - {title}")
-    v_id = parse_qs(urlparse(YT_URL).query)['v'][0]
-    print(f"video {channel=} {title=} {v_id=}")
-
-    print('fetching transcript text ...')
+def fetch_transcript_text(YT_URL: str) -> str:
     text = f"-\n( {YT_URL= } )\n"
+    v_id = parse_qs(urlparse(YT_URL).query)['v'][0]
     transcript_list = YouTubeTranscriptApi().list(v_id)
     for transcript in transcript_list:
         fetched_transcript = transcript.fetch()
@@ -47,6 +41,18 @@ def main(YT_URL):
                 text += '\n'
             text += snippet.text + ' '
         text += f"\n*** END OF {transcript.language.upper()} TRANSCRIPT ***\n"
+    return text
+
+
+def ytvideo_to_epub(YT_URL: str, mv_to_gdrive=True) -> (tuple[str, io.BytesIO] | None):
+    attrs = video_attrs(YT_URL)
+    channel = attrs['author_name']
+    title = attrs['title']
+    title_filename = filename_safe(f"{channel} - {title}")
+    print(f"video {channel=} {title=}")
+
+    print('fetching transcript text ...')
+    text = fetch_transcript_text(YT_URL)
 
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp = Path(tmpdir)
@@ -69,12 +75,16 @@ def main(YT_URL):
             '-c', f"{thumbnail_file.absolute()}",
         ])
 
-        print(f'moving epub to google drive ( ebooks/yt_transcripts/{title_filename}.epub ) ...')
-        destination = Path('/run/user/1000/gvfs/google-drive:host=gmail.com,user=thejeremyjohn/') \
-            .joinpath('My Drive/ebooks/yt_transcripts/')  # ^^^ gvfs-mounted google drive
-        subprocess.run(f'mv "{epub_file}" "{destination}"', shell=True)
+        if mv_to_gdrive:
+            print(
+                f'moving epub to google drive ( ebooks/yt_transcripts/{title_filename}.epub ) ...')
+            destination = Path('/run/user/1000/gvfs/google-drive:host=gmail.com,user=thejeremyjohn/') \
+                .joinpath('My Drive/ebooks/yt_transcripts/')  # ^^^ gvfs-mounted google drive
+            subprocess.run(f'mv "{epub_file}" "{destination}"', shell=True)
+        else:
+            return (epub_file.name, io.BytesIO(epub_file.read_bytes()))
 
 
 if __name__ == '__main__':
     assert len(sys.argv) > 1, "expected yt_url positional argument"
-    main(sys.argv[1])
+    ytvideo_to_epub(sys.argv[1])
