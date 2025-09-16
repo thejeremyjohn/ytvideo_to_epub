@@ -1,0 +1,11 @@
+.env
+*.log
+__pycache__
+*.pyc
+*.egg-info
+.tags
+.tags1
+test/file_dump
+stripe_override.json
+.pytest
+.pytest_cache

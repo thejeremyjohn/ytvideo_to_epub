@@ -1,0 +1,15 @@
+# This systemd unit file allows you to start the yt2epub server on boot
+# Save it to /etc/systemd/system/yt2epub.service
+# Make it executable with chmod +x /etc/systemd/system/yt2epub.service
+# Enable it with systemctl enable yt2epub.service
+# Start it with systemctl start yt2epub.service
+
+[Unit]
+Description=yt2epub
+
+[Service]
+User=ubuntu
+ExecStart=/usr/local/sbin/yt2epub.sh
+
+[Install]
+WantedBy=multi-user.target
