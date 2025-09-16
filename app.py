@@ -14,9 +14,12 @@ def index():
             epub_file,
             mimetype='application/epub+zip',
             as_attachment=True,
-            download_name=name
+            download_name=name,
         )
-    return render_template('index.html')
+    return render_template(
+        'index.html',
+        yt_url=request.args.get('url', ''),
+    )
 
 
 if __name__ == '__main__':

@@ -1,10 +1,13 @@
 # usage:
 # python ytvideo_to_epub.py https://www.youtube.com/watch?v=gtBIPF2aMys
 
-from youtube_transcript_api import YouTubeTranscriptApi
-from urllib.parse import urlparse, parse_qs
+from dotenv import load_dotenv; load_dotenv()
 from pathlib import Path
+from urllib.parse import urlparse, parse_qs
+from youtube_transcript_api import YouTubeTranscriptApi
+from youtube_transcript_api.proxies import GenericProxyConfig
 import io
+import os
 import requests
 import subprocess
 import sys
@@ -33,7 +36,11 @@ def image_url_to_file(image_url: str, dir=Path('.')) -> Path:
 def fetch_transcript_text(YT_URL: str) -> str:
     text = f"-\n( {YT_URL= } )\n"
     v_id = parse_qs(urlparse(YT_URL).query)['v'][0]
-    transcript_list = YouTubeTranscriptApi().list(v_id)
+
+    proxy_config = None if not os.environ.get('PROXY_URL') \
+        else GenericProxyConfig(https_url=os.environ['PROXY_URL'])
+    transcript_list = YouTubeTranscriptApi(proxy_config).list(v_id)
+
     for transcript in transcript_list:
         fetched_transcript = transcript.fetch()
         for snippet in fetched_transcript:
