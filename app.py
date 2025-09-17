@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, send_file
+from flask import Flask, render_template, request, jsonify, send_file
 from ytvideo_to_epub import ytvideo_to_epub
 
 app = Flask(__name__)
@@ -8,7 +8,11 @@ app = Flask(__name__)
 def index():
     if request.method == 'POST':
         yt_url = request.form['yt_url']
-        name, epub_file = ytvideo_to_epub(yt_url, mv_to_gdrive=False)
+
+        try:
+            name, epub_file = ytvideo_to_epub(yt_url, mv_to_gdrive=False)
+        except Exception as error:
+            return jsonify(str(error)), 400
 
         return send_file(
             epub_file,
