@@ -81,7 +81,7 @@ def ytvideo_to_epub(YT_URL: str, mv_to_gdrive=True) -> (tuple[str, io.BytesIO] |
             '-t', f"{title}",
             '-a', f"{channel}",
             '-c', f"{thumbnail_file.absolute()}",
-        ])
+        ], capture_output=True, text=True)
 
         if mv_to_gdrive:
             print(
