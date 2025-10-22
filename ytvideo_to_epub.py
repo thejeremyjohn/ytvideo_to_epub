@@ -73,7 +73,7 @@ def ytvideo_to_epub(YT_URL: str, mv_to_gdrive=True) -> (tuple[str, io.BytesIO] |
 
         print('converting text_file to epub ...')
         epub_file = tmp.joinpath(f"{title_filename}.epub")
-        subprocess.run([
+        p = subprocess.run([
             sys.executable, '-m',
             'txt2epub', 'convert',
             '-i', f"{text_file.absolute()}",
@@ -82,6 +82,8 @@ def ytvideo_to_epub(YT_URL: str, mv_to_gdrive=True) -> (tuple[str, io.BytesIO] |
             '-a', f"{channel}",
             '-c', f"{thumbnail_file.absolute()}",
         ], capture_output=True, text=True)
+        if p.stderr:
+            raise Exception(p.stderr)
 
         if mv_to_gdrive:
             print(

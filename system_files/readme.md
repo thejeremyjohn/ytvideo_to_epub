@@ -1,13 +1,13 @@
 ## Install miniconda
 ```bash
-mkdir -p ~/miniconda3
 wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
-    -O ~/miniconda3/miniconda.sh
-bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
-rm ~/miniconda3/miniconda.sh
+    -O /tmp/miniconda.sh
 
-source ~/miniconda3/bin/activate
-conda init --all
+# run the interactive installation >> yes >> init
+bash /tmp/miniconda.sh
+
+#refresh the terminal
+source ~/.bashrc
 ```
 
 ## Create the conda environment
@@ -15,12 +15,15 @@ conda init --all
 conda create -n yt2epub python=3.10.18 -y \
     && conda activate yt2epub
 ```
-## git clone this repo
+## Clone this repo
+```bash
+git clone https://github.com/thejeremyjohn/ytvideo_to_epub.git
+```
 
 ## install requirements
 ```bash
-# txt2epub system dependency
-sudo apt update && sudo apt install libegl1
+# txt2epub system dependencies
+sudo apt update && sudo apt install libegl1 libgl1 libfontconfig1
 # python requirements
 pip install -r ytvideo_to_epub/requirements.txt
 ```

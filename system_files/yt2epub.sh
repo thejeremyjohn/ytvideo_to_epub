@@ -7,6 +7,6 @@
 cd /home/ubuntu/ytvideo_to_epub
 /home/ubuntu/miniconda3/envs/yt2epub/bin/python -m gunicorn app:app \
 	--bind 0.0.0.0:5100 \
-	--workers $(nproc --all | awk '{print $1*2+1}') \
+	--workers 2 \
 	--log-file "-" \
 	--access-logfile "-"
